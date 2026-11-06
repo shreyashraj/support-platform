@@ -1,0 +1,8 @@
+target/
+data/
+.venv/
+mcp/target/
+mcp/audit/
+.idea/
+*.iml
+.DS_Store

@@ -1,0 +1,51 @@
+extends: ["spectral:oas"]
+
+rules:
+  operation-operationId: error
+  operation-tags: error
+  oas3-api-servers: warn
+
+  every-operation-declares-required-scopes:
+    description: Every operation must say which OAuth scope it needs.
+    severity: error
+    given: "$.paths[*][get,post,put,patch,delete]"
+    then:
+      field: x-required-scopes
+      function: truthy
+
+  errors-use-problem-json:
+    description: 4xx and 5xx responses must be application/problem+json (RFC 9457).
+    severity: error
+    given: "$.paths[*][*].responses[?(@property.match(/^[45]/))]"
+    then:
+      field: content
+      function: schema
+      functionOptions:
+        schema:
+          type: object
+          required: [application/problem+json]
+
+  paths-are-versioned:
+    description: Paths start with a major version segment.
+    severity: error
+    given: "$.paths"
+    then:
+      field: "@key"
+      function: pattern
+      functionOptions:
+        match: "^/v[0-9]+/"
+
+  post-needs-idempotency-key:
+    description: Non-webhook POSTs on cases must take an Idempotency-Key.
+    severity: warn
+    given: "$.paths[?(@property.match(/^\\/v1\\/cases\\/\\{id\\}\\//))].post"
+    then:
+      field: parameters
+      function: schema
+      functionOptions:
+        schema:
+          type: array
+          contains:
+            type: object
+            properties:
+              $ref: { const: "#/components/parameters/IdempotencyKey" }

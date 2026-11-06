@@ -1,0 +1,60 @@
+server:
+  port: ${PORT:8080}
+  shutdown: graceful
+
+spring:
+  application:
+    name: support-platform
+  sql:
+    init:
+      mode: always
+  mvc:
+    problemdetails:
+      enabled: false
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+logging:
+  structured:
+    format:
+      console: logstash
+  level:
+    root: INFO
+    com.example.support: INFO
+
+platform:
+  db-path: data/platform.db
+  security:
+    jwt-secret: dev-only-secret-change-me-dev-only-secret-change-me
+    issuer: https://idp.local/
+    audience: support-platform-api
+  rate-limit:
+    per-minute: 120
+    agent-per-minute: 40
+  upstream:
+    api-key: dev-upstream-key
+    cases:
+      base-url: http://localhost:${server.port}/mock/cases
+    entitlements:
+      base-url: http://localhost:${server.port}/mock/entitlements
+      cache-ttl: 30s
+    usage:
+      base-url: http://localhost:${server.port}/mock/usage
+      retry-attempts: 2
+  webhooks:
+    allow-private-targets: true
+    max-attempts: 8
+  mocks:
+    enabled: true
+    demo-webhook-secret: demo-webhook-secret-do-not-use
